@@ -1,0 +1,20 @@
+{
+  "name": "trial",
+  "version": "1.0.0",
+  "description": "Trial",
+  "main": "script.js",
+  "author": "emmanueljoe",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.9.3",
+    "upper-case": "^3.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "start": "node script.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
