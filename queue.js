@@ -143,7 +143,7 @@ class CircularQueue{
     }
 
     print(){
-        if(!this.items){
+        if(this.items.length === 0){
             console.log('Queue is empty')
         } else {
             let i;

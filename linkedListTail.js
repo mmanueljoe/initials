@@ -13,6 +13,7 @@ class Node {
 export class LinkedList{
     size = 0;
     head = null;
+    tail = null;
 
 
     isEmpty(){
@@ -27,9 +28,11 @@ export class LinkedList{
         const node = new Node(value);
         if(this.isEmpty()){
             this.head = node;
+            this.tail = node;
         } else {
             node.next = this.head;
             this.head = node;
+            this.tail = node;
         }
 
         this.size++;
@@ -55,6 +58,7 @@ export class LinkedList{
         const node = new Node(value);
         if(this.isEmpty()){
             this.head = node;
+            this.tail = node;
         } else {
             let prev = this.head;
             while(prev.next){
@@ -111,6 +115,37 @@ export class LinkedList{
         return removedNode.value;
     }
 
+    removeFromFront(){
+        if(this.isEmpty()) return null;
+
+        const value = this.head.value;
+        this.head = this.head.next;
+
+        this.size--;
+        return value;
+    }
+
+    removeFromEnd(){
+        if(this.isEmpty()) return null;
+
+        const value = this.tail.value;
+        if(this.size === 1){
+            this.head = null;
+            this.tail = null;
+        }else{
+            let prev = this.head;
+
+            while(prev.next !== this.tail){
+                prev = prev.next
+            }
+
+            prev.next = null;
+            this.tail = prev;
+        }
+
+        this.size--;
+        return value;
+    }
 
     removeValue(value){
         if(this.isEmpty()) return null;
