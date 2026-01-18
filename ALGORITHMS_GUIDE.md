@@ -11,6 +11,9 @@
 8. [General Algorithm Design Approach](#general-algorithm-design-approach)
 9. [Binary Search Algorithm](#binary-search-algorithm)
 10. [Prime Checking and Efficiency](#prime-checking-and-efficiency-isprime)
+11. [Binary Search Trees (BST)](#binary-search-trees-bst)
+12. [Graphs](#graphs)
+13. [Hash Tables](#hash-tables)
 
 ---
 
@@ -1770,6 +1773,662 @@ A: Left subarray indices match the original (0 to middle-1). Right subarray indi
 
 ---
 
+## Binary Search Trees (BST)
+
+### What is a Binary Search Tree?
+
+A **Binary Search Tree (BST)** is a binary tree data structure where:
+- Each node has at most **two children** (left and right)
+- **Left subtree** contains values **less than** the node's value
+- **Right subtree** contains values **greater than** the node's value
+- Both left and right subtrees are also BSTs
+
+**Key Property:** In-order traversal of a BST gives values in **sorted order**.
+
+### Visual Example
+
+```
+        10
+       /  \
+      5    15
+     / \     \
+    3   7    20
+```
+
+**Properties:**
+- All values in left subtree of 10: `[3, 5, 7]` < 10
+- All values in right subtree of 10: `[15, 20]` > 10
+- In-order traversal: `3, 5, 7, 10, 15, 20` (sorted!)
+
+### BST Node Structure
+
+```javascript
+class Node {
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+```
+
+### Insertion
+
+**Algorithm:**
+1. If tree is empty, create root node
+2. Compare value with current node
+3. If smaller → go left, if larger → go right
+4. Repeat until finding null position
+5. Insert new node there
+
+```javascript
+insert(value) {
+    const newNode = new Node(value);
+    
+    if (this.isEmpty()) {
+        this.root = newNode;
+    } else {
+        this.insertNode(this.root, newNode);
+    }
+}
+
+insertNode(root, newNode) {
+    if (newNode.value < root.value) {
+        if (root.left === null) {
+            root.left = newNode;
+        } else {
+            this.insertNode(root.left, newNode);
+        }
+    } else {
+        if (root.right === null) {
+            root.right = newNode;
+        } else {
+            this.insertNode(root.right, newNode);
+        }
+    }
+}
+```
+
+**Time Complexity:** O(log n) average, O(n) worst case (unbalanced tree)  
+**Space Complexity:** O(log n) recursive, O(1) iterative
+
+### Search
+
+**Algorithm:**
+1. Start at root
+2. Compare value with current node
+3. If equal → found!
+4. If smaller → search left subtree
+5. If larger → search right subtree
+6. If null reached → not found
+
+```javascript
+search(root, value) {
+    if (root === null) {
+        return false;
+    }
+    
+    if (root.value === value) {
+        return true;
+    } else if (value < root.value) {
+        return this.search(root.left, value);
+    } else {
+        return this.search(root.right, value);
+    }
+}
+```
+
+**Time Complexity:** O(log n) average, O(n) worst case  
+**Space Complexity:** O(log n) recursive
+
+### Tree Traversals
+
+#### 1. PreOrder Traversal
+
+**Order:** Root → Left → Right
+
+```javascript
+preOrder(root) {
+    if (root) {
+        console.log(root.value);      // Visit root FIRST
+        this.preOrder(root.left);     // Then left subtree
+        this.preOrder(root.right);    // Then right subtree
+    }
+}
+```
+
+**Example:** `10 → 5 → 3 → 7 → 15 → 20`
+
+**Use cases:** Copying tree structure, prefix expressions
+
+#### 2. InOrder Traversal
+
+**Order:** Left → Root → Right
+
+```javascript
+inOrder(root) {
+    if (root) {
+        this.inOrder(root.left);      // Visit left FIRST
+        console.log(root.value);       // Visit root IN MIDDLE
+        this.inOrder(root.right);      // Then right subtree
+    }
+}
+```
+
+**Example:** `3 → 5 → 7 → 10 → 15 → 20` (sorted order!)
+
+**Use cases:** Printing BST in sorted order, infix expressions
+
+#### 3. PostOrder Traversal
+
+**Order:** Left → Right → Root
+
+```javascript
+postOrder(root) {
+    if (root) {
+        this.postOrder(root.left);    // Visit left FIRST
+        this.postOrder(root.right);   // Then right subtree
+        console.log(root.value);      // Visit root LAST
+    }
+}
+```
+
+**Example:** `3 → 7 → 5 → 20 → 15 → 10`
+
+**Use cases:** Deleting tree, postfix expressions, calculating directory sizes
+
+#### 4. LevelOrder Traversal (BFS)
+
+**Order:** Level by level, left to right
+
+```javascript
+levelOrder(root) {
+    const queue = [];
+    queue.push(root);
+    
+    while (queue.length) {
+        let curr = queue.shift();
+        console.log(curr.value);
+        
+        if (curr.left) {
+            queue.push(curr.left);
+        }
+        if (curr.right) {
+            queue.push(curr.right);
+        }
+    }
+}
+```
+
+**Example:** `10 → 5 → 15 → 3 → 7 → 20`
+
+**Use cases:** Printing tree level by level, finding shortest path
+
+### Finding Min and Max
+
+**Min:** Leftmost node (keep going left)  
+**Max:** Rightmost node (keep going right)
+
+```javascript
+min(root) {
+    if (root.left === null) {
+        return root.value;
+    } else {
+        return this.min(root.left);
+    }
+}
+
+max(root) {
+    if (root.right === null) {
+        return root.value;
+    } else {
+        return this.max(root.right);
+    }
+}
+```
+
+**Time Complexity:** O(log n) average, O(n) worst case  
+**Space Complexity:** O(log n) recursive
+
+### Deletion
+
+**Three cases:**
+1. **No children:** Simply delete the node
+2. **One child:** Replace node with its child
+3. **Two children:** Replace with inorder successor (min of right subtree)
+
+```javascript
+delete(value) {
+    this.root = this.deleteNode(this.root, value);
+}
+
+deleteNode(root, value) {
+    if (root === null) {
+        return root;
+    }
+    
+    if (value < root.value) {
+        root.left = this.deleteNode(root.left, value);
+    } else if (value > root.value) {
+        root.right = this.deleteNode(root.right, value);
+    } else {
+        // Node to delete found
+        
+        // Case 1: No children
+        if (!root.left && !root.right) {
+            return null;
+        }
+        
+        // Case 2: One child
+        if (!root.left) {
+            return root.right;
+        } else if (!root.right) {
+            return root.left;
+        }
+        
+        // Case 3: Two children
+        root.value = this.min(root.right);
+        root.right = this.deleteNode(root.right, root.value);
+    }
+    
+    return root;
+}
+```
+
+**Time Complexity:** O(log n) average, O(n) worst case  
+**Space Complexity:** O(log n) recursive
+
+### BST Complexity Summary
+
+| Operation | Average | Worst Case |
+|-----------|---------|------------|
+| Search | O(log n) | O(n) |
+| Insert | O(log n) | O(n) |
+| Delete | O(log n) | O(n) |
+| Min/Max | O(log n) | O(n) |
+| Traversal | O(n) | O(n) |
+
+**Note:** Worst case O(n) occurs when tree becomes a linked list (unbalanced).
+
+### Key Takeaways
+
+1. **BST maintains sorted order** - left < root < right
+2. **InOrder traversal** gives sorted values
+3. **Average operations** are O(log n) - very efficient!
+4. **Worst case** is O(n) if tree is unbalanced
+5. **Self-balancing trees** (AVL, Red-Black) maintain O(log n) worst case
+
+---
+
+## Graphs
+
+### What is a Graph?
+
+A **graph** is a collection of **vertices** (nodes) connected by **edges** (links). Unlike trees, graphs can have cycles and multiple paths between nodes.
+
+**Types:**
+- **Directed:** Edges have direction (A → B)
+- **Undirected:** Edges are bidirectional (A ↔ B)
+- **Weighted:** Edges have weights/costs
+- **Unweighted:** All edges equal
+
+### Graph Representations
+
+#### 1. Adjacency Matrix
+
+A 2D array where `matrix[i][j] = 1` if edge exists, `0` otherwise.
+
+```javascript
+// Undirected graph: A-B-C
+const matrix = [
+  [0, 1, 0],  // A: connected to B
+  [1, 0, 1],  // B: connected to A and C
+  [0, 1, 0],  // C: connected to B
+];
+```
+
+**Pros:**
+- O(1) edge lookup
+- Simple to implement
+
+**Cons:**
+- O(V²) space (V = vertices)
+- Inefficient for sparse graphs
+
+#### 2. Adjacency List
+
+An object/array where each vertex maps to a list of its neighbors.
+
+```javascript
+// Same graph as above
+const adjacencyList = {
+    'A': ['B'],
+    'B': ['A', 'C'],
+    'C': ['B']
+};
+```
+
+**Pros:**
+- O(V + E) space (E = edges)
+- Efficient for sparse graphs
+- Easy to iterate neighbors
+
+**Cons:**
+- O(degree) edge lookup (not O(1))
+
+### Graph Implementation (Adjacency List)
+
+```javascript
+class Graph {
+    constructor() {
+        this.adjacencyList = {};
+    }
+    
+    // Add a vertex
+    addVertex(vertex) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = new Set();
+        }
+    }
+    
+    // Add an edge (undirected)
+    addEdge(vertex1, vertex2) {
+        if (!this.adjacencyList[vertex1]) {
+            this.addVertex(vertex1);
+        }
+        if (!this.adjacencyList[vertex2]) {
+            this.addVertex(vertex2);
+        }
+        
+        this.adjacencyList[vertex1].add(vertex2);
+        this.adjacencyList[vertex2].add(vertex1);  // Undirected
+    }
+    
+    // Check if edge exists
+    hasEdge(vertex1, vertex2) {
+        return (
+            this.adjacencyList[vertex1]?.has(vertex2) &&
+            this.adjacencyList[vertex2]?.has(vertex1)
+        );
+    }
+    
+    // Remove an edge
+    removeEdge(vertex1, vertex2) {
+        this.adjacencyList[vertex1]?.delete(vertex2);
+        this.adjacencyList[vertex2]?.delete(vertex1);
+    }
+    
+    // Remove a vertex
+    removeVertex(vertex) {
+        if (!this.adjacencyList[vertex]) {
+            return;
+        }
+        
+        // Remove all edges connected to this vertex
+        for (let adjacentVertex of this.adjacencyList[vertex]) {
+            this.removeEdge(vertex, adjacentVertex);
+        }
+        
+        delete this.adjacencyList[vertex];
+    }
+    
+    // Display graph
+    display() {
+        for (let vertex in this.adjacencyList) {
+            console.log(vertex + " -> " + [...this.adjacencyList[vertex]]);
+        }
+    }
+}
+```
+
+### Graph Traversal
+
+#### Depth-First Search (DFS)
+
+**Algorithm:** Explore as far as possible along each branch before backtracking.
+
+```javascript
+dfs(start, visited = new Set()) {
+    visited.add(start);
+    console.log(start);
+    
+    for (let neighbor of this.adjacencyList[start]) {
+        if (!visited.has(neighbor)) {
+            this.dfs(neighbor, visited);
+        }
+    }
+}
+```
+
+**Time Complexity:** O(V + E)  
+**Space Complexity:** O(V) for visited set + recursion stack
+
+#### Breadth-First Search (BFS)
+
+**Algorithm:** Explore all neighbors at current depth before moving to next level.
+
+```javascript
+bfs(start) {
+    const queue = [start];
+    const visited = new Set([start]);
+    
+    while (queue.length) {
+        const vertex = queue.shift();
+        console.log(vertex);
+        
+        for (let neighbor of this.adjacencyList[vertex]) {
+            if (!visited.has(neighbor)) {
+                visited.add(neighbor);
+                queue.push(neighbor);
+            }
+        }
+    }
+}
+```
+
+**Time Complexity:** O(V + E)  
+**Space Complexity:** O(V) for queue and visited set
+
+### Graph Use Cases
+
+- **Social networks:** Friends connections
+- **Web pages:** Links between pages
+- **Maps:** Roads connecting cities
+- **Dependencies:** Package dependencies
+- **Recommendation systems:** User-item connections
+
+### Key Takeaways
+
+1. **Graphs** represent relationships between entities
+2. **Adjacency list** is preferred for most use cases (space efficient)
+3. **DFS** uses recursion/stack (goes deep)
+4. **BFS** uses queue (goes wide)
+5. **Both** have O(V + E) time complexity
+
+---
+
+## Hash Tables
+
+### What is a Hash Table?
+
+A **hash table** (hash map) is a data structure that stores key-value pairs. It uses a **hash function** to compute an index into an array of buckets, where the value can be found.
+
+**Key Operations:**
+- **Set:** Insert/update a key-value pair
+- **Get:** Retrieve value by key
+- **Remove:** Delete a key-value pair
+
+**Average Time Complexity:** O(1) for all operations!  
+**Worst Case:** O(n) if many collisions
+
+### How Hash Tables Work
+
+1. **Hash function** converts key → index
+2. **Store value** at that index
+3. **Collision handling** if multiple keys hash to same index
+
+### Hash Function
+
+A function that maps keys to array indices.
+
+```javascript
+hash(key) {
+    let total = 0;
+    
+    for (let i = 0; i < key.length; i++) {
+        total += key.charCodeAt(i);
+    }
+    
+    return total % this.size;  // Modulo to fit array size
+}
+```
+
+**Properties of good hash function:**
+- **Deterministic:** Same key → same index
+- **Uniform distribution:** Spreads keys evenly
+- **Fast:** O(1) or O(k) where k is key length
+
+### Collision Handling
+
+When two keys hash to the same index, we need to handle the collision.
+
+#### Chaining (Separate Chaining)
+
+Store multiple key-value pairs at the same index using a data structure (array, linked list).
+
+```javascript
+class HashTable {
+    constructor(size) {
+        this.table = new Array(size);
+        this.size = size;
+    }
+    
+    hash(key) {
+        let total = 0;
+        for (let i = 0; i < key.length; i++) {
+            total += key.charCodeAt(i);
+        }
+        return total % this.size;
+    }
+    
+    set(key, value) {
+        const index = this.hash(key);
+        let bucket = this.table[index];
+        
+        if (!bucket) {
+            bucket = [[key, value]];  // Create bucket
+        } else {
+            // Check if key already exists
+            const sameKeyItem = bucket.find(item => item[0] === key);
+            if (sameKeyItem) {
+                sameKeyItem[1] = value;  // Update existing
+            } else {
+                bucket.push([key, value]);  // Add new pair
+            }
+        }
+        
+        this.table[index] = bucket;
+    }
+    
+    get(key) {
+        const index = this.hash(key);
+        const bucket = this.table[index];
+        
+        if (bucket) {
+            const sameKeyItem = bucket.find(item => item[0] === key);
+            if (sameKeyItem) {
+                return sameKeyItem[1];
+            }
+        }
+        
+        return undefined;
+    }
+    
+    remove(key) {
+        const index = this.hash(key);
+        const bucket = this.table[index];
+        
+        if (bucket) {
+            const sameKeyItem = bucket.find(item => item[0] === key);
+            if (sameKeyItem) {
+                bucket.splice(bucket.indexOf(sameKeyItem), 1);
+            }
+        }
+    }
+    
+    display() {
+        for (let i = 0; i < this.table.length; i++) {
+            if (this.table[i]) {
+                console.log(i, this.table[i]);
+            }
+        }
+    }
+}
+```
+
+### Hash Table Example
+
+```javascript
+const hashTable = new HashTable(5);
+
+hashTable.set("name", "John");
+hashTable.set("age", 25);
+hashTable.set("city", "New York");
+
+console.log(hashTable.get("name"));  // "John"
+hashTable.remove("age");
+hashTable.display();
+```
+
+**Visual representation:**
+```
+Index 0: [["name", "John"]]
+Index 1: [["age", 25]]
+Index 2: [["city", "New York"]]
+Index 3: null
+Index 4: null
+```
+
+### Hash Table Complexity
+
+| Operation | Average | Worst Case |
+|-----------|---------|------------|
+| Set | O(1) | O(n) |
+| Get | O(1) | O(n) |
+| Remove | O(1) | O(n) |
+
+**Worst case** occurs when:
+- All keys hash to same index (poor hash function)
+- Many collisions requiring linear search through bucket
+
+### Load Factor
+
+**Load factor** = number of entries / number of buckets
+
+- **High load factor** (> 0.7): More collisions, slower performance
+- **Low load factor** (< 0.3): Wasted space
+- **Optimal:** Around 0.5-0.7
+
+**Solution:** Resize table when load factor gets too high.
+
+### Hash Table Use Cases
+
+- **Caching:** Fast lookups (e.g., memoization)
+- **Database indexing:** Quick record access
+- **Dictionaries/Maps:** Key-value storage
+- **Counting frequencies:** Track occurrences
+- **Deduplication:** Remove duplicates
+
+### Key Takeaways
+
+1. **Hash tables** provide O(1) average time for operations
+2. **Hash function** maps keys to indices
+3. **Collisions** handled by chaining or open addressing
+4. **Load factor** affects performance
+5. **Worst case** is O(n) but rare with good hash function
+
+---
+
 ## Summary
 
 ### Key Takeaways
@@ -1785,15 +2444,25 @@ A: Left subarray indices match the original (0 to middle-1). Right subarray indi
 9. **Binary search** requires sorted array and eliminates half the space each step → O(log n)
 10. **Binary search loop condition** must use `<=` not `<` to check all elements
 11. **Index adjustments** needed in recursive slicing approach for right subarray
+12. **Binary Search Trees** maintain sorted order with O(log n) average operations
+13. **Tree traversals**: PreOrder (root first), InOrder (sorted), PostOrder (root last)
+14. **Graphs** represent relationships using adjacency lists or matrices
+15. **DFS** explores deep (recursion/stack), **BFS** explores wide (queue)
+16. **Hash Tables** provide O(1) average time using hash functions and collision handling
 
-### Practice Exercise
+### Practice Exercises
 
-Try implementing these algorithms both ways:
-
+**Basic Algorithms:**
 1. **Sum of array** (iterative and recursive)
 2. **Find maximum in array** (iterative and recursive)
 3. **Binary search** (iterative and recursive)
 4. **Fibonacci** (iterative and recursive)
+
+**Data Structures:**
+5. **Linked List** - Implement append, prepend, insert, remove, search, reverse
+6. **Binary Search Tree** - Implement insert, search, delete, traversals
+7. **Graph** - Implement addVertex, addEdge, DFS, BFS
+8. **Hash Table** - Implement set, get, remove with collision handling
 
 Compare the approaches and analyze their complexity!
 
